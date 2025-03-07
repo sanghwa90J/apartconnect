@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>관리자 - 가입 승인</title>
+</head>
+<body>
+<h2>아파트 승인 대기</h2>
+
+<table border="1">
+    <tr>
+        <th>이메일</th>
+        <th>이름</th>
+        <th>소속 아파트</th>
+        <th>승인</th>
+    </tr>
+    <tr th:each="user : ${pendingUsers}">
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.apartmentName}"></td>
+        <td>
+            <form th:action="@{/admin/approve/{userId}(userId=${user.id})}" method="post">
+                <button type="submit">승인</button>
+            </form>
+            <form th:action="@{/admin/reject/{userId}(userId=${user.id})}" method="post">
+                <button type="submit">거절</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<h2>가입된 사용자 목록</h2>
+
+<table border="1">
+    <tr>
+        <th>이메일</th>
+        <th>역할</th>
+        <th>승인 여부</th>
+        <th>액션</th>
+    </tr>
+    <tr th:each="user : ${allUsers}">
+        <td th:text="${user.email}"></td>
+        <td>
+            <form th:action="@{/admin/update-role/{userId}(userId=${user.id})}" method="post">
+                <select name="newRole">
+                    <option value="USER" th:selected="${user.role.name() == 'USER'}">USER</option>
+                    <option value="ADMIN" th:selected="${user.role.name() == 'ADMIN'}">ADMIN</option>
+                </select>
+                <button type="submit">역할 변경</button>
+            </form>
+        </td>
+        <td th:text="${user.useYn == 'Y' ? '승인됨' : '대기 중'}"></td>
+        <td>
+            <form th:action="@{/admin/approve/{userId}(userId=${user.id})}" method="post">
+                <button type="submit">승인</button>
+            </form>
+            <form th:action="@{/admin/reject/{userId}(userId=${user.id})}" method="post">
+                <button type="submit">삭제</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<br>
+<a href="/dashboard">대시보드로 돌아가기</a>
+</body>
+</html>
