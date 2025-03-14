@@ -4,119 +4,83 @@ import com.aptconnect.entity.Role;
 import com.aptconnect.entity.User;
 import com.aptconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/admin")
+@PreAuthorize("hasRole('ROLE_ADMIN')")  // 🔥 ADMIN만 접근 가능
 public class AdminController {
-
     private final UserRepository userRepository;
 
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard(Model model) {
-        // 현재 로그인한 사용자 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+    @GetMapping("/dashboard")
+    public String adminDashboard(Model model, Authentication authentication) {
+        User adminUser = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("사용자 없음"));
+        model.addAttribute("currentPage", "dashboard"); // 🎯 현재 페이지 정보 추가
 
-        model.addAttribute("user", user);
-        model.addAttribute("title", "관리자 대시보드");
-
-        return "admin-dashboard"; // admin-dashboard.html 템플릿 반환
+        return "/admin/dashboard";
     }
 
-    // 가입 요청 목록 보기 (현재 관리자의 아파트 사용자만 조회, 본인 제외)
-    @GetMapping("/admin/users")
-    public String viewUsers(Model model, Authentication authentication) {
-        User adminUser = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("관리자 정보 없음"));
+    // 🔥 입주민 관리 페이지
+    @GetMapping("/users")
+    public String viewUsers(@RequestParam(required = false) String search, Model model, @ModelAttribute("adminUser") User adminUser) {
+        String apartmentName = adminUser.getApartmentName();  // ✅ ADMIN이 관리하는 아파트 이름 가져오기
 
-        List<User> pendingUsers;
-        List<User> allUsers;
+        // 🔥 같은 아파트 소속 유저 중 PENDING 또는 APPROVED 상태인 유저 조회 (MASTER 제외)
+        List<User> users = userRepository.findByApartmentNameAndApartmentAccessIn(apartmentName, List.of("PENDING", "APPROVED"))
+                .stream()
+                .filter(user -> user.getRole() != Role.MASTER)  // MASTER 계정 제외
+                .collect(Collectors.toList());
 
-        if (adminUser.getRole() == Role.MASTER) {
-            // MASTER는 모든 사용자 조회 가능 (자기 자신 제외)
-            pendingUsers = userRepository.findByEmailNotAndApartmentAccess("PENDING", adminUser.getEmail());
-            allUsers = userRepository.findByEmailNot(adminUser.getEmail());
+        // 🔥 ADMIN 권한을 가진 유저만 별도로 필터링
+        List<User> adminUsers = users.stream()
+                .filter(user -> user.getRole() == Role.ADMIN)
+                .collect(Collectors.toList());
 
-        } else {
-            // ADMIN은 자기 아파트 사용자만 조회 가능 (자기 자신 제외)
-            String apartmentName = adminUser.getApartmentName();
-            pendingUsers = userRepository.findByApartmentNameAndEmailNotAndApartmentAccess(apartmentName, "PENDING", adminUser.getEmail());
-            allUsers = userRepository.findByApartmentNameAndEmailNot(apartmentName, adminUser.getEmail());
+        // 🔥 일반 입주민 유저 (ADMIN 제외)
+        List<User> residentUsers = users.stream()
+                .filter(user -> user.getRole() != Role.ADMIN)
+                .collect(Collectors.toList());
+
+        // 🔎 검색 기능 (이름 or 이메일 포함)
+        if (search != null && !search.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getName().contains(search) || user.getEmail().contains(search))
+                    .toList();
         }
 
-        model.addAttribute("pendingUsers", pendingUsers);
-        model.addAttribute("allUsers", allUsers);
-        return "admin-users";
+        model.addAttribute("adminUsers", adminUsers);  // ADMIN 리스트
+        model.addAttribute("users", residentUsers);   // 일반 입주민 리스트
+        model.addAttribute("searchKeyword", search);
+        model.addAttribute("currentPage", "users");
+
+        return "/admin/users";
     }
 
-    // 회원가입 승인 처리
-    @PostMapping("/admin/approve/{userId}")
-    public String approveUser(@PathVariable Long userId, Authentication authentication) {
-        User adminUser = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("관리자 정보 없음"));
-
+    @PostMapping("/users/update-access")
+    public String updateApartmentAccess(@RequestParam Long userId, @RequestParam String newAccess, @ModelAttribute("adminUser") User adminUser) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        // ADMIN이 자기 아파트의 사용자만 승인할 수 있도록 제한
-        if (adminUser.getRole() != Role.MASTER && !adminUser.getApartmentName().equals(user.getApartmentName())) {
-            throw new RuntimeException("다른 아파트 사용자는 승인할 수 없습니다.");
+        // ✅ ADMIN이 관리하는 아파트 입주민만 변경 가능
+        if (!user.getApartmentName().equals(adminUser.getApartmentName())) {
+            throw new SecurityException("해당 아파트 소속이 아닌 사용자는 관리할 수 없습니다.");
         }
 
-        user.setApartmentAccess("APPROVED"); // ✅ 승인 처리
+        if (!newAccess.equals("PENDING") && !newAccess.equals("APPROVED")) {
+            throw new IllegalArgumentException("잘못된 접근 상태 값");
+        }
+
+        user.setApartmentAccess(newAccess); // ✅ 상태 변경
         userRepository.save(user);
         return "redirect:/admin/users";
     }
-
-    // 회원가입 거절 처리 (사용자 삭제)
-    @PostMapping("/admin/reject/{userId}")
-    public String rejectUser(@PathVariable Long userId, Authentication authentication) {
-        User adminUser = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("관리자 정보 없음"));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자 없음"));
-
-        if (adminUser.getRole() != Role.MASTER && !adminUser.getApartmentName().equals(user.getApartmentName())) {
-            throw new RuntimeException("다른 아파트 사용자는 삭제할 수 없습니다.");
-        }
-
-        userRepository.deleteById(userId);
-        return "redirect:/admin/users";
-    }
-
-    // ROLE 변경 처리
-    @PostMapping("/admin/update-role/{userId}")
-    public String updateUserRole(@PathVariable Long userId, @RequestParam String newRole, Authentication authentication) {
-        User adminUser = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("관리자 정보 없음"));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자 없음"));
-
-        if (adminUser.getRole() != Role.MASTER && !adminUser.getApartmentName().equals(user.getApartmentName())) {
-            throw new RuntimeException("다른 아파트 사용자의 권한을 변경할 수 없습니다.");
-        }
-
-        if (user.getRole() == Role.MASTER) {
-            throw new RuntimeException("MASTER의 권한은 변경할 수 없습니다.");
-        }
-
-        user.setRole(Role.valueOf(newRole)); // 새로운 역할 설정
-        userRepository.save(user);
-        return "redirect:/admin/users";
-    }
-
 }

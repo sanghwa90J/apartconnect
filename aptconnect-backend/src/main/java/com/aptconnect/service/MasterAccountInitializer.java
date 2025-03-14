@@ -39,9 +39,9 @@ public class MasterAccountInitializer {
             master.setRole(Role.MASTER);
             master.setUseYn("Y");
             master.setCreateUser("SYSTEM");
-            master.setApartmentName("MASTER");
-            master.setBuildingNumber("MASTER");
-            master.setUnitNumber("MASTER");
+//            master.setApartmentName("MASTER");
+//            master.setBuildingNumber("MASTER");
+//            master.setUnitNumber("MASTER");
             master.setApartmentAccess("APPROVED");
 
             userRepository.save(master);

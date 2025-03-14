@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" th:fragment="navbar" th:with="currentPage=${currentPage}">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/master/dashboard">APTConnect Master</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'dashboard' ? 'active' : ''}" href="/master/dashboard">대시보드</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'apartments' ? 'active' : ''}" href="/master/apartments">아파트 관리</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'users' ? 'active' : ''}" href="/master/users">회원 관리</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'logs' ? 'active' : ''}" href="/master/logs">로그 관리</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'user-Activity' ? 'active' : ''}" href="/master/user-activity">사용자 활동 관리</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'announcements' ? 'active' : ''}" href="/announcements">공지사항 관리</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'complaints' ? 'active' : ''}" href="/complaints">민원 관리</a>
+                </li>
+            </ul>
+            <span class="navbar-text me-3" th:if="${currentUser != null and currentUser.role.toString() == 'MASTER'}">MASTER</span>
+            <a class="btn btn-danger" href="/logout">로그아웃</a>
+        </div>
+    </div>
+</nav>

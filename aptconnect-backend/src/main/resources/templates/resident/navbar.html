@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" th:fragment="navbar" th:with="currentPage=${currentPage}">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/announcements">APTConnect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'announcements' ? 'active' : ''}" href="/announcements">공지사항</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'votes' ? 'active' : ''}" href="/voting">투표</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'community' ? 'active' : ''}" href="/community">커뮤니티</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPage == 'complaints' ? 'active' : ''}" href="/complaints">민원 관리</a>
+                </li>
+            </ul>
+            <span class="navbar-text me-3" th:if="${currentUser != null}" th:text="${currentUser.name + ' (' + currentUser.role.toString() + ')'}"></span>
+            <a class="btn btn-danger" href="/logout">로그아웃</a>
+        </div>
+    </div>
+</nav>

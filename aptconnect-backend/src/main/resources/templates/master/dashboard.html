@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Master Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container { width: 100%; /* 가로는 100% 꽉 차게 */ max-width: none; /* 최대 크기 제한 */ height: 20vh; /* 화면 높이의 20% */ min-height: 300px; /* 너무 작아지지 않도록 최소 높이 설정 */ text-align: center; margin-top: 20px; }
+        .chart-container canvas{ display: block; margin: auto; width: 100% !important; height: 100% !important; }
+    </style>
+</head>
+<body>
+<div th:replace="~{master/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6"> <!-- 사용자 현황 차트 -->
+            <div class="card mb-4">
+                <div class="card-header">사용자 현황</div>
+                <div class="card-body">
+                    <div class="card-body chart-container">
+                        <canvas id="userStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6"> <!-- 월별 사용자 등록 차트 -->
+            <div class="card mb-4">
+                <div class="card-header">월별 사용자 등록 현황</div>
+                <div class="card-body">
+                    <div class="card-body chart-container">
+                        <canvas id="monthlyUserChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6"> <!-- 아파트 등록 현황 차트 -->
+            <div class="card mb-4">
+                <div class="card-header">아파트 등록 현황</div>
+                <div class="card-body">
+                    <div class="card-body chart-container">
+                        <canvas id="apartmentStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6"> <!-- 월별 아파트 등록 차트 -->
+            <div class="card mb-4">
+                <div class="card-header">월별 아파트 등록 현황</div>
+                <div class="card-body">
+                    <div class="card-body chart-container">
+                        <canvas id="monthlyApartmentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">일별 로그 발생 수<</div>
+                <div class="card-body">
+                    <div class="card-body chart-container">
+                        <canvas id="dailyLogChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thymeleaf 데이터 변환 -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let userStatusData = /*[[${userStatus}]]*/ {};
+    let monthlyData = /*[[${monthlyUserRegistration}]]*/ {};
+    let apartmentStatusData = /*[[${apartmentStatus}]]*/ {};
+    let monthlyApartmentData = /*[[${monthlyApartmentRegistration}]]*/ {};
+
+    userStatusData = userStatusData || {};
+    monthlyData = monthlyData || {};
+    apartmentStatusData = apartmentStatusData || {};
+    monthlyApartmentData = monthlyApartmentData || {};
+
+    function ensureDefaultData(data, defaultValue) {
+        return Object.keys(data).length > 0 ? data : defaultValue;
+    }
+
+    // 기본 데이터 설정
+    userStatusData = ensureDefaultData(userStatusData, { "없음": 0 });
+    monthlyData = ensureDefaultData(monthlyData, { "1월": 0, "2월": 0, "3월": 0, "4월": 0, "5월": 0, "6월": 0 });
+    apartmentStatusData = ensureDefaultData(apartmentStatusData, { "없음": 0 });
+    monthlyApartmentData = ensureDefaultData(monthlyApartmentData, { "1월": 0, "2월": 0, "3월": 0, "4월": 0, "5월": 0, "6월": 0 });
+    /*]]>*/
+</script>
+
+<!-- 사용자 현황 차트 (Pie Chart) -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctxUserStatus = document.getElementById('userStatusChart').getContext('2d');
+
+        new Chart(ctxUserStatus, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(userStatusData),
+                datasets: [{
+                    data: Object.values(userStatusData),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // 비율 강제 유지 해제
+                aspectRatio: 3, // 가로 공간 확보
+                plugins: {
+                    legend: {
+                        position: 'right', // 범례를 오른쪽으로 이동
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+<!-- 월별 사용자 등록 차트 (Line Chart) -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctxMonthlyUser = document.getElementById('monthlyUserChart').getContext('2d');
+
+        new Chart(ctxMonthlyUser, {
+            type: 'line',
+            data: {
+                labels: Object.keys(monthlyData),
+                datasets: [{
+                    label: '월별 사용자 등록 수',
+                    data: Object.values(monthlyData),
+                    borderColor: '#36A2EB',
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,  // 비율 조정 가능하도록 설정
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctxApartmentStatus = document.getElementById('apartmentStatusChart').getContext('2d');
+
+        new Chart(ctxApartmentStatus, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(apartmentStatusData),
+                datasets: [{
+                    data: Object.values(apartmentStatusData),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 3,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        var ctxMonthlyApartment = document.getElementById('monthlyApartmentChart').getContext('2d');
+
+        new Chart(ctxMonthlyApartment, {
+            type: 'line',
+            data: {
+                labels: Object.keys(monthlyApartmentData),
+                datasets: [{
+                    label: '월별 아파트 등록 수',
+                    data: Object.values(monthlyApartmentData),
+                    borderColor: '#36A2EB',
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var dailyLogData = /*[[${dailyLogCounts}]]*/ {};
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctxDailyLog = document.getElementById('dailyLogChart').getContext('2d');
+
+        new Chart(ctxDailyLog, {
+            type: 'line',
+            data: {
+                labels: Object.keys(dailyLogData), // 날짜 리스트
+                datasets: [{
+                    label: '일별 로그 발생 수',
+                    data: Object.values(dailyLogData), // 로그 개수 리스트
+                    borderColor: '#FF6384',
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>아파트 기준정보  </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<!-- 🔥 마스터 네비게이션 바 포함 -->
+<div th:replace="~{master/navbar :: navbar}" ></div>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <span class="fw-bold">총 아파트 수: </span>
+            <span th:text="${apartments.size()}"></span>
+        </div>
+        <div class="d-flex align-items-center">
+            <form action="/master/apartments" method="get" class="d-flex align-items-center me-3">
+                <input type="text" name="search" placeholder="아파트 이름 검색" class="form-control me-2" th:value="${searchKeyword}">
+                <button type="submit" class="btn btn-secondary me-2" style="min-width: 90px; white-space: nowrap;">검색</button>
+                <a href="/master/apartments" class="btn btn-light" style="min-width: 90px; white-space: nowrap;">초기화</a>
+            </form>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addApartmentModal">아파트 추가</button>
+        </div>
+    </div>
+
+    <div th:if="${apartments.size() == 0}" class="alert alert-warning text-center" role="alert">
+        검색된 아파트가 없습니다.
+    </div>
+
+    <table class="table table-striped text-center" th:if="${apartments.size() > 0}">
+        <thead>
+        <tr>
+            <th style="width: 20%;">아파트 이름</th>
+            <th style="width: 70%;">대표 주소</th>
+            <th style="width: 10%;">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="apartment : ${apartments}" class="align-middle">
+            <td th:text="${apartment.name}"></td>
+            <td th:text="${apartment.address}"></td>
+            <td class="text-end">
+                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#editApartmentModal' + ${apartment.id}">수정</button>
+                <form action="/master/apartments/delete" method="post" class="d-inline" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                    <input type="hidden" name="id" th:value="${apartment.id}">
+                    <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 추가 모달 -->
+<div class="modal fade" id="addApartmentModal" tabindex="-1" aria-labelledby="addApartmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addApartmentModalLabel">아파트 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/master/apartments/add" method="post">
+                    <div class="mb-3">
+                        <input type="text" name="name" placeholder="아파트 이름" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="address" placeholder="대표 주소" class="form-control" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">추가</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 수정 모달 -->
+<div th:each="apartment : ${apartments}" class="modal fade" th:id="'editApartmentModal' + ${apartment.id}" tabindex="-1" aria-labelledby="editApartmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">아파트 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/master/apartments/edit" method="post">
+                    <input type="hidden" name="id" th:value="${apartment.id}">
+                    <div class="mb-3">
+                        <input type="text" name="name" class="form-control" th:value="${apartment.name}" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="address" class="form-control" th:value="${apartment.address}" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-warning">수정</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

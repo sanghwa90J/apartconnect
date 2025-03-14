@@ -6,7 +6,11 @@ import com.aptconnect.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -46,5 +50,27 @@ public class UserService {
         user.setUpdateDate(LocalDateTime.now());
 
         userRepository.save(user);
+    }
+
+    public Map<String, Long> getUserStatus() {
+        Map<String, Long> userStatus = new LinkedHashMap<>();
+        userStatus.put("MASTER", userRepository.countByRole(Role.MASTER));
+        userStatus.put("ADMIN", userRepository.countByRole(Role.ADMIN));
+        userStatus.put("USER", userRepository.countByRole(Role.USER));
+
+        return userStatus;
+    }
+
+    public Map<String, Long> getMonthlyUserRegistration() {
+        Map<String, Long> monthlyData = new LinkedHashMap<>();
+        LocalDate now = LocalDate.now();
+
+        for (int i = 5; i >= 0; i--) {
+            YearMonth yearMonth = YearMonth.from(now.minusMonths(i));
+            long count = userRepository.countByRegistrationMonth(yearMonth.getYear(), yearMonth.getMonthValue());
+            monthlyData.put(yearMonth.toString(), count);
+        }
+
+        return monthlyData;
     }
 }
