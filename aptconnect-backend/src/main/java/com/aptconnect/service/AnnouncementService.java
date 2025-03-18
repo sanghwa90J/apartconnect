@@ -13,8 +13,8 @@ public class AnnouncementService {
     private final AnnouncementRepository announcementRepository;
 
     // 공지 저장
-    public Announcement saveAnnouncement(Announcement announcement) {
-        return announcementRepository.save(announcement);
+    public void saveAnnouncement(Announcement announcement) {
+        announcementRepository.save(announcement);
     }
 
     // 공지 수정

@@ -22,6 +22,10 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+    }
+
     public void registerUser(String email, String password, String name, String apartmentName,
                              String buildingNumber, String unitNumber) {
         User user = new User();

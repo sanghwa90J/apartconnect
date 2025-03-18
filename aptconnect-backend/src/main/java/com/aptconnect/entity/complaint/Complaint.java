@@ -1,11 +1,13 @@
-package com.aptconnect.entity.announcement;
+package com.aptconnect.entity.complaint;
 
 import com.aptconnect.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,6 +35,10 @@ public class Complaint {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User createdBy; // 작성자 (익명이라도 DB에는 저장됨)
+
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore  // ✅ Hibernate 프록시 변환 방지
+    private List<ComplaintComment> comments;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now(); // 작성일

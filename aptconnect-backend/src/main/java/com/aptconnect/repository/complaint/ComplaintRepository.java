@@ -1,6 +1,6 @@
-package com.aptconnect.repository;
+package com.aptconnect.repository.complaint;
 
-import com.aptconnect.entity.announcement.Complaint;
+import com.aptconnect.entity.complaint.Complaint;
 import com.aptconnect.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

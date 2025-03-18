@@ -1,13 +1,16 @@
-package com.aptconnect.service;
+package com.aptconnect.service.complaint;
 
-import com.aptconnect.entity.announcement.Complaint;
+import com.aptconnect.entity.complaint.Complaint;
 import com.aptconnect.entity.User;
-import com.aptconnect.repository.ComplaintRepository;
+import com.aptconnect.entity.complaint.ComplaintStatus;
+import com.aptconnect.repository.complaint.ComplaintRepository;
 import com.aptconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -58,5 +61,25 @@ public class ComplaintService {
         complaint.setUpdatedAt(LocalDateTime.now());
 
         complaintRepository.save(complaint);
+    }
+
+    // 🔥 민원 상태 변경 메서드
+    @Transactional
+    public Complaint updateComplaintStatus(Long complaintId, String newStatus) {
+        Complaint complaint = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("🚨 민원을 찾을 수 없습니다."));
+
+        if (!isValidStatus(newStatus)) {
+            throw new IllegalArgumentException("🚨 유효하지 않은 상태 값입니다: " + newStatus);
+        }
+
+        complaint.setStatus(ComplaintStatus.valueOf(newStatus));
+        complaintRepository.save(complaint);
+
+        return complaint;
+    }
+
+    private boolean isValidStatus(String status) {
+        return Arrays.stream(ComplaintStatus.values()).anyMatch(s -> s.name().equals(status));
     }
 }

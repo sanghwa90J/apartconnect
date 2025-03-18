@@ -66,7 +66,7 @@ public class AnnouncementController {
 
     // 공지 저장 (Master는 전체 공지, Admin은 특정 아파트 공지)
     @PostMapping("/create")
-    public String createAnnouncement(@ModelAttribute Announcement announcement, Model model) {
+    public String createAnnouncement(@ModelAttribute Announcement announcement) {
         String username = authenticationFacade.getCurrentUserEmail();
         announcement.setAuthor(username);
         announcementService.saveAnnouncement(announcement);
@@ -83,6 +83,7 @@ public class AnnouncementController {
             throw new AccessDeniedException("공지사항 삭제 권한이 없습니다.");
         }
 
-        announcementService.deleteAnnouncement(id);        return "redirect:/announcements";
+        announcementService.deleteAnnouncement(id);
+        return "redirect:/announcements";
     }
 }

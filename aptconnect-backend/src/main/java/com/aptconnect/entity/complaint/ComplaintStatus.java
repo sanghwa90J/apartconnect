@@ -1,4 +1,4 @@
-package com.aptconnect.entity.announcement;
+package com.aptconnect.entity.complaint;
 
 public enum ComplaintStatus {
     PENDING,    // 대기 중 (기본값)

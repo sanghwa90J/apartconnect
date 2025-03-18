@@ -1,17 +1,21 @@
-package com.aptconnect.controller;
+package com.aptconnect.controller.complaint;
 
 import com.aptconnect.component.AuthenticationFacade;
-import com.aptconnect.entity.announcement.Complaint;
+import com.aptconnect.entity.complaint.Complaint;
 import com.aptconnect.entity.Role;
 import com.aptconnect.entity.User;
-import com.aptconnect.service.ComplaintService;
+import com.aptconnect.service.complaint.ComplaintService;
 import com.aptconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/complaints")
@@ -40,9 +44,9 @@ public class ComplaintController {
         return "/complaints/complaint-list";
     }
 
-    @GetMapping("/{id}")
-    public String viewComplaintDetail(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
-        Complaint complaint = complaintService.getComplaintById(id);
+    @GetMapping("/{complaintId}")
+    public String viewComplaintDetail(@PathVariable("complaintId") Long complaintId, Model model, @ModelAttribute("currentUser") User currentUser) {
+        Complaint complaint = complaintService.getComplaintById(complaintId);
 
         // 본인이 작성했거나, ADMIN 또는 MASTER인 경우만 상세 페이지 접근 가능
         if (!currentUser.getRole().equals(Role.MASTER) &&
@@ -54,10 +58,32 @@ public class ComplaintController {
         model.addAttribute("complaint", complaint);
         model.addAttribute("currentRole", "ROLE_" + currentUser.getRole());
         model.addAttribute("currentPage", "complaints"); // 🎯 현재 페이지 정보 추가
+        model.addAttribute("currentUser", currentUser); // ✅ 기존 currentUser를 그대로 사용
 
         return "complaints/complaint-detail"; // 상세 페이지 템플릿
     }
 
+    // 🔥 민원 상태 변경 API
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Map<String, String>> updateComplaintStatus(@PathVariable Long id, @RequestBody Map<String, String> requestBody) {
+        String currentUser = authenticationFacade.getCurrentUserRole();
+        String newStatus = requestBody.get("newStatus"); // ✅ JSON 데이터에서 newStatus 추출
+
+        // ✅ 권한 체크: ADMIN 또는 MASTER만 가능
+        if (!(currentUser.equals("ROLE_ADMIN") || currentUser.equals("ROLE_MASTER"))) {
+            throw new SecurityException("상태 변경 권한이 없습니다.");
+        }
+
+        if (newStatus == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "newStatus 값이 필요합니다."));
+        }
+
+        Complaint updatedComplaint = complaintService.updateComplaintStatus(id, newStatus);
+        Map<String, String> response = new HashMap<>();
+        response.put("newStatus", updatedComplaint.getStatus().name()); // 변경된 상태 반환
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/create")
     public String showComplaintForm(Model model) {
@@ -76,7 +102,6 @@ public class ComplaintController {
 
         complaint.setCreatedBy(user);
         complaint.setApartmentName(user.getApartmentName());
-        System.out.println("TEST-POINT : " + complaint.getIsAnonymous());
         complaintService.saveComplaint(complaint);
         return "redirect:/complaints";
     }

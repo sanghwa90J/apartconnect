@@ -1,4 +1,4 @@
-package com.aptconnect.entity.announcement;
+package com.aptconnect.entity.complaint;
 
 public enum ComplaintCategory {
     NOISE,        // 소음 문제
