@@ -1,4 +1,4 @@
-package com.aptconnect.entity;
+package com.aptconnect.entity.announcement;
 
 public enum AnnouncementType {
     GENERAL, // 전체 공지 (Master가 등록)

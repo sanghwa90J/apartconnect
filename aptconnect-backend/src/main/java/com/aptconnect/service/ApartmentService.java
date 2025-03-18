@@ -1,5 +1,6 @@
 package com.aptconnect.service;
 
+import com.aptconnect.entity.Apartment;
 import com.aptconnect.repository.ApartmentRepository;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Service
@@ -55,5 +57,13 @@ public class ApartmentService {
         }
 
         return monthlyRegistrations;
+    }
+
+    public List<Apartment> searchApartments(String query) {
+        return apartmentRepository.findByNameContainingIgnoreCase(query);
+    }
+
+    public Apartment getApartmentById(Long id) {
+        return apartmentRepository.findById(id).orElse(null);
     }
 }

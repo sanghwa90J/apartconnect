@@ -34,8 +34,11 @@
             <label for="content" class="form-label">내용</label>
             <textarea id="content" name="content" class="form-control" rows="5" required></textarea>
         </div>
+        <!-- 숨겨진 필드 추가 (기본값 false) -->
+<!--        <input type="hidden" name="isAnonymous" value="false">-->
+
         <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="isAnonymous" name="isAnonymous">
+            <input type="checkbox" class="form-check-input" id="isAnonymous" name="isAnonymous" value="true">
             <label class="form-check-label" for="isAnonymous">익명으로 제출</label>
         </div>
         <button type="submit" class="btn btn-primary">제출</button>

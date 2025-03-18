@@ -23,7 +23,7 @@ public class UserService {
     }
 
     public void registerUser(String email, String password, String name, String apartmentName,
-                             String buildingNumber, String unitNumber, String createUser) {
+                             String buildingNumber, String unitNumber) {
         User user = new User();
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
@@ -31,14 +31,13 @@ public class UserService {
         user.setRole(Role.USER);
         user.setUseYn("Y");
         user.setApartmentAccess("PENDING"); // ✅ 기본적으로 아파트 접근 불가
-        user.setCreateUser(createUser);
+        user.setCreateUser(email);
         user.setCreateDate(LocalDateTime.now());
 
         // 🔥 아파트 정보 저장
         user.setApartmentName(apartmentName);
         user.setBuildingNumber(buildingNumber);
         user.setUnitNumber(unitNumber);
-
 
         userRepository.save(user);
     }

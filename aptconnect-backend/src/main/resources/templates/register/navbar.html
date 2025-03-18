@@ -9,9 +9,8 @@
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentPage == 'announcements' ? 'active' : ''}" href="/announcements">공지사항</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:classappend="${currentPage == 'votes' ? 'active' : ''}" href="/voting">투표</a>
-                </li>
+                <li><a class="nav-link" th:classappend="${currentPage == 'votes' ? 'active' : ''}" href="/votes">투표 관리</a></li>
+                <li><a class="nav-link" th:classappend="${currentPage == 'my-votes' ? 'active' : ''}" href="/votes/my-votes">참여한 투표</a></li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentPage == 'community' ? 'active' : ''}" href="/community">커뮤니티</a>
                 </li>
@@ -25,3 +24,20 @@
         </div>
     </div>
 </nav>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let dropdowns = document.querySelectorAll(".navbar .dropdown");
+
+        dropdowns.forEach(function (dropdown) {
+            dropdown.addEventListener("mouseenter", function () {
+                let menu = this.querySelector(".dropdown-menu");
+                menu.classList.add("show");
+            });
+
+            dropdown.addEventListener("mouseleave", function () {
+                let menu = this.querySelector(".dropdown-menu");
+                menu.classList.remove("show");
+            });
+        });
+    });
+</script>

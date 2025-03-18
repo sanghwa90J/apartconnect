@@ -27,9 +27,28 @@
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentPage == 'complaints' ? 'active' : ''}" href="/complaints">민원 관리</a>
                 </li>
+                <li><a class="nav-link" th:classappend="${currentPage == 'votes' ? 'active' : ''}" href="/votes">투표 관리</a></li>
+                <li><a class="nav-link" th:classappend="${currentPage == 'my-votes' ? 'active' : ''}" href="/votes/my-votes">참여한 투표</a></li>
             </ul>
             <span class="navbar-text me-3" th:if="${currentUser != null and currentUser.role.toString() == 'MASTER'}">MASTER</span>
             <a class="btn btn-danger" href="/logout">로그아웃</a>
         </div>
     </div>
 </nav>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let dropdowns = document.querySelectorAll(".navbar .dropdown");
+
+        dropdowns.forEach(function (dropdown) {
+            dropdown.addEventListener("mouseenter", function () {
+                let menu = this.querySelector(".dropdown-menu");
+                menu.classList.add("show");
+            });
+
+            dropdown.addEventListener("mouseleave", function () {
+                let menu = this.querySelector(".dropdown-menu");
+                menu.classList.remove("show");
+            });
+        });
+    });
+</script>

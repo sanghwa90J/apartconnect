@@ -31,14 +31,14 @@ public class AdminController {
 
     // 🔥 입주민 관리 페이지
     @GetMapping("/users")
-    public String viewUsers(@RequestParam(required = false) String search, Model model, @ModelAttribute("adminUser") User adminUser) {
+    public String viewUsers(@RequestParam(required = false) String search, Model model, @ModelAttribute("currentUser") User adminUser) {
         String apartmentName = adminUser.getApartmentName();  // ✅ ADMIN이 관리하는 아파트 이름 가져오기
 
         // 🔥 같은 아파트 소속 유저 중 PENDING 또는 APPROVED 상태인 유저 조회 (MASTER 제외)
         List<User> users = userRepository.findByApartmentNameAndApartmentAccessIn(apartmentName, List.of("PENDING", "APPROVED"))
                 .stream()
                 .filter(user -> user.getRole() != Role.MASTER)  // MASTER 계정 제외
-                .collect(Collectors.toList());
+                .toList();
 
         // 🔥 ADMIN 권한을 가진 유저만 별도로 필터링
         List<User> adminUsers = users.stream()
@@ -52,7 +52,7 @@ public class AdminController {
 
         // 🔎 검색 기능 (이름 or 이메일 포함)
         if (search != null && !search.isEmpty()) {
-            users = users.stream()
+            residentUsers = residentUsers.stream()
                     .filter(user -> user.getName().contains(search) || user.getEmail().contains(search))
                     .toList();
         }
@@ -66,7 +66,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/update-access")
-    public String updateApartmentAccess(@RequestParam Long userId, @RequestParam String newAccess, @ModelAttribute("adminUser") User adminUser) {
+    public String updateApartmentAccess(@RequestParam Long userId, @RequestParam String newAccess, @ModelAttribute("currentUser") User adminUser) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
 

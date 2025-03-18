@@ -33,7 +33,7 @@
             <label for="content" class="form-label">내용</label>
             <textarea id="content" name="content" class="form-control" rows="5" required th:text="*{content}"></textarea>
         </div>
-        <input type="hidden" name="createdBy" th:value="${complaint.createdBy.id}">
+        <input type="hidden" name="createdBy.id" th:value="${createdById}">
         <button type="submit" class="btn btn-primary">수정 완료</button>
         <a href="/complaints" class="btn btn-secondary">취소</a>
     </form>

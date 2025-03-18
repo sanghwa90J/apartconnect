@@ -21,6 +21,8 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Long> {
     @Query("SELECT FUNCTION('MONTH', a.createDate), COUNT(a) FROM Apartment a " +
             "WHERE a.createDate >= :startDate GROUP BY FUNCTION('MONTH', a.createDate)")
     List<Object[]> countMonthlyApartmentRegistrations(@Param("startDate") LocalDateTime startDate);
+
+    List<Apartment> findByNameContainingIgnoreCase(String name);
 }
 
 

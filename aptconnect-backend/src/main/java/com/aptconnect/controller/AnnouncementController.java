@@ -1,13 +1,11 @@
 package com.aptconnect.controller;
 
 import com.aptconnect.component.AuthenticationFacade;
-import com.aptconnect.entity.Announcement;
-import com.aptconnect.entity.AnnouncementType;
+import com.aptconnect.entity.announcement.Announcement;
+import com.aptconnect.entity.announcement.AnnouncementType;
 import com.aptconnect.entity.User;
-import com.aptconnect.repository.UserRepository;
 import com.aptconnect.service.AnnouncementService;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,7 +19,6 @@ import java.util.List;
 public class AnnouncementController {
     private final AnnouncementService announcementService;
     private final AuthenticationFacade authenticationFacade; // 로그인한 사용자 정보 가져오기
-    private final UserRepository userRepository;
 
     // 공지 목록 조회 (Master: 전체 / Admin: 자기 아파트 공지만)
     @GetMapping
@@ -29,12 +26,18 @@ public class AnnouncementController {
         String currentRole = authenticationFacade.getCurrentUserRole();
         String apartmentName = authenticationFacade.getCurrentUserApartment();
 
+        if(!currentRole.contains("ROLE_")){
+            System.out.println("TEST-POINT : " + currentRole);
+            currentRole += "ROLE_" + currentRole;
+        }
+
         List<Announcement> announcements;
         if ("ROLE_MASTER".equals(currentRole)) {
             announcements = announcementService.getAllAnnouncements(); // 전체 공지 조회
         } else {
             announcements = announcementService.getAnnouncementsByApartment(apartmentName); // 해당 아파트 공지만 조회
         }
+
         model.addAttribute("currentPage", "announcements"); // 🎯 현재 페이지 정보 추가
         model.addAttribute("announcements", announcements);
         model.addAttribute("currentRole", currentRole);

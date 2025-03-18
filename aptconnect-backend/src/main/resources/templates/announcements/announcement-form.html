@@ -13,6 +13,9 @@
 <div th:if="${currentRole == 'ROLE_ADMIN'}">
     <div th:replace="~{/admin/navbar :: navbar}"></div>
 </div>
+<div th:if="${currentRole == 'ROLE_USER'}">
+    <div th:replace="~{/register/navbar :: navbar}"></div>
+</div>
 
 <div class="container mt-4">
     <form action="/announcements/create" method="post">

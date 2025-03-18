@@ -1,6 +1,6 @@
 package com.aptconnect.service;
 
-import com.aptconnect.entity.Announcement;
+import com.aptconnect.entity.announcement.Announcement;
 import com.aptconnect.repository.AnnouncementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

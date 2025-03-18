@@ -1,4 +1,4 @@
-package com.aptconnect.entity;
+package com.aptconnect.entity.announcement;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.aptconnect.entity;
+package com.aptconnect.entity.announcement;
 
 public enum AnnouncementPriority {
     NORMAL,      // 일반 공지

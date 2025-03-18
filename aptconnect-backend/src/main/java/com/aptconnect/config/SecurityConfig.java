@@ -36,7 +36,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)  // CSRF 비활성화 (테스트 용도)
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/",  "/register", "/login", "/error").permitAll()  // 🔥 `/register` 허용 추가
+                    .requestMatchers("/",  "/register/**", "/login", "/error").permitAll()  // 🔥 `/register` 허용 추가
                         .requestMatchers("/dashboard").access((authentication, context) -> {
                             User user = userRepository.findByEmail(authentication.get().getName()).orElseThrow();
                             return user.getApartmentAccess().equals("APPROVED") ? new AuthorizationDecision(true) : new AuthorizationDecision(false);

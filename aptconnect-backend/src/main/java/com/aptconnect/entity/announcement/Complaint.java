@@ -1,5 +1,6 @@
-package com.aptconnect.entity;
+package com.aptconnect.entity.announcement;
 
+import com.aptconnect.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,5 +44,5 @@ public class Complaint {
     private String apartmentName; // 아파트 이름 (입주민의 소속 아파트)
 
     @Column(nullable = false)
-    private boolean isAnonymous = false; // 익명 여부
+    private Boolean isAnonymous = false; // 익명 여부
 }

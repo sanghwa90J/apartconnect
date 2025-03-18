@@ -6,7 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -83,4 +82,18 @@ public class User  implements UserDetails {
 
         @Override
         public boolean isEnabled() { return "Y".equals(useYn); }  // "N"이면 계정 비활성화
-    }
+
+        @Override
+        public boolean equals(Object obj) {
+                if (this == obj) return true;
+                if (obj == null || getClass() != obj.getClass()) return false;
+                User user = (User) obj;
+                return id != null && id.equals(user.id);
+        }
+
+        @Override
+        public int hashCode() {
+                return getClass().hashCode();
+        }
+
+}

@@ -1,6 +1,6 @@
 package com.aptconnect.repository;
 
-import com.aptconnect.entity.Announcement;
+import com.aptconnect.entity.announcement.Announcement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

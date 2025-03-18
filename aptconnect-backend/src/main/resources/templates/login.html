@@ -8,11 +8,6 @@
 <div class="container mt-5">
     <h2>로그인</h2>
 
-    <!-- 승인 대기 메시지 -->
-    <div th:if="${param.pending}">
-        <p style="color: red;">관리자의 승인이 필요합니다. 승인 후 로그인할 수 있습니다.</p>
-    </div>
-
     <!-- 로그인 실패 메시지 -->
     <div th:if="${param.error}" class="alert alert-danger">
         이메일 또는 비밀번호가 잘못되었습니다.

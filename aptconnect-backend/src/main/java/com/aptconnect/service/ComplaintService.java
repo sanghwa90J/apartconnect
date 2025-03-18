@@ -1,19 +1,19 @@
 package com.aptconnect.service;
 
-import com.aptconnect.entity.Complaint;
+import com.aptconnect.entity.announcement.Complaint;
 import com.aptconnect.entity.User;
 import com.aptconnect.repository.ComplaintRepository;
+import com.aptconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ComplaintService {
     private final ComplaintRepository complaintRepository;
+    private final UserRepository userRepository;
 
     public Complaint saveComplaint(Complaint complaint) {
         return complaintRepository.save(complaint);
@@ -35,19 +35,20 @@ public class ComplaintService {
         return complaintRepository.findByCreatedBy(currentUser);
     }
 
-    public Optional<Complaint> getComplaintById(Long id) {
-        return complaintRepository.findById(id);
+    public Complaint getComplaintById(Long id) {
+        return complaintRepository.findComplaintWithUserById(id)
+                .orElseThrow(() -> new RuntimeException("민원을 찾을 수 없습니다."));
     }
 
     public void deleteComplaint(Long id) {
         complaintRepository.deleteById(id);
     }
 
-    public void updateComplaint(Long id, Complaint updatedComplaint, User currentUser) {
+    public void updateComplaint(Long id, Complaint updatedComplaint, User user) {
         Complaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("민원을 찾을 수 없습니다."));
 
-        if (!complaint.getCreatedBy().equals(currentUser)) {
+        if (!complaint.getCreatedBy().equals(user)) {
             throw new SecurityException("해당 민원을 수정할 권한이 없습니다.");
         }
 
@@ -58,5 +59,4 @@ public class ComplaintService {
 
         complaintRepository.save(complaint);
     }
-
 }
