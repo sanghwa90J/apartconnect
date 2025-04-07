@@ -1,0 +1,46 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title>공지사항 상세</title>
+
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_USER'}">
+        <div th:replace="~{/register/navbar :: navbar}"></div>
+    </div>
+</div>
+
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 th:text="${announcement.title}"></h4>
+            </div>
+            <div class="card-body">
+                <p><strong>중요도:</strong> <span th:text="${announcement.priority}"></span></p>
+                <p><strong>내용:</strong></p>
+                <div th:utext="${announcement.content}"></div>
+                <!--                <p th:text="${announcement.content}"></p>-->
+                <p><strong>작성자:</strong> <span th:text="${announcement.author}"></span></p>
+                <p><strong>작성일:</strong> <span th:text="${#temporals.format(announcement.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+
+                <!-- 🔥 MASTER만 수정/삭제 가능 -->
+                <div th:if="${currentRole == 'ROLE_MASTER' or (currentRole == 'ROLE_ADMIN' and announcement.author == currentUser.email)}">
+                    <a th:href="@{/announcements/edit/{id}(id=${announcement.id})}" class="btn btn-warning">수정</a>
+                    <form th:action="@{/announcements/delete/{id}(id=${announcement.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+                    </form>
+                </div>
+
+                <a href="/announcements" class="btn btn-secondary mt-3">목록으로</a>
+            </div>
+        </div>
+    </div>
+</div>

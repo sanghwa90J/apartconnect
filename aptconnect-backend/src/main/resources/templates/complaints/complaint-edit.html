@@ -1,42 +1,62 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>민원 수정</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body>
-<div th:if="${currentRole == 'ROLE_MASTER'}">
-    <div th:replace="~{/master/navbar :: navbar}"></div>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title>민원 수정</title>
+
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_USER'}">
+        <div th:replace="~{/register/navbar :: navbar}"></div>
+    </div>
 </div>
-<div th:if="${currentRole == 'ROLE_ADMIN'}">
-    <div th:replace="~{/admin/navbar :: navbar}"></div>
+
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <form id="writeForm" th:action="@{/complaints/update/{id}(id=${complaint.id})}" method="post" th:object="${complaint}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="title" class="form-label">제목</label>
+                <input type="text" id="title" name="title" class="form-control" th:value="*{title}" required>
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">카테고리</label>
+                <select id="category" name="category" class="form-select" required>
+                    <option value="NOISE" th:selected="${complaint.category.name() == 'NOISE'}">소음 문제</option>
+                    <option value="PARKING" th:selected="${complaint.category.name() == 'PARKING'}">주차 문제</option>
+                    <option value="MAINTENANCE" th:selected="${complaint.category.name() == 'MAINTENANCE'}">시설 유지보수</option>
+                    <option value="OTHER" th:selected="${complaint.category.name() == 'OTHER'}">기타</option>
+                </select>
+            </div>
+            <div th:replace="fragments/editor :: editor(${complaint.content})"></div>
+
+<!--            <div class="mb-3">-->
+<!--                <label for="content" class="form-label">내용</label>-->
+<!--                <textarea id="content" name="content" class="form-control" rows="5" required th:text="*{content}"></textarea>-->
+<!--            </div>-->
+            <!-- ✅ 파일 업로드 추가 -->
+            <div class="mb-3">
+                <label for="file" class="form-label">파일 첨부 (이미지, PDF 등)</label>
+                <input type="file" id="file" name="files" class="form-control" multiple>
+            </div>
+
+            <!-- ✅ 기존 첨부 파일 목록 표시 -->
+            <div class="mb-3" th:if="${existingFiles != null and not #lists.isEmpty(existingFiles)}">
+                <label class="form-label">기존 첨부 파일</label>
+                <ul>
+                    <li th:each="file : ${existingFiles}">
+                        <a th:href="@{/complaints/files/{fileId}/download(fileId=${file.id})}" th:text="${file.fileName}" target="_blank"></a>
+                    </li>
+                </ul>
+            </div>
+            <input type="hidden" name="createdBy.id" th:value="${createdById}">
+            <button type="submit" class="btn btn-primary">수정 완료</button>
+            <a href="/complaints" class="btn btn-secondary">취소</a>
+        </form>
+    </div>
 </div>
-<div th:if="${currentRole == 'ROLE_USER'}">
-    <div th:replace="~{/register/navbar :: navbar}"></div>
-</div>
-<div class="container mt-4">
-    <form th:action="@{/complaints/update/{id}(id=${complaint.id})}" method="post" th:object="${complaint}">
-        <div class="mb-3">
-            <label for="title" class="form-label">제목</label>
-            <input type="text" id="title" name="title" class="form-control" th:value="*{title}" required>
-        </div>
-        <div class="mb-3">
-            <label for="category" class="form-label">카테고리</label>
-            <select id="category" name="category" class="form-select" required>
-                <option value="NOISE" th:selected="${complaint.category.name() == 'NOISE'}">소음 문제</option>
-                <option value="PARKING" th:selected="${complaint.category.name() == 'PARKING'}">주차 문제</option>
-                <option value="MAINTENANCE" th:selected="${complaint.category.name() == 'MAINTENANCE'}">시설 유지보수</option>
-                <option value="OTHER" th:selected="${complaint.category.name() == 'OTHER'}">기타</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="content" class="form-label">내용</label>
-            <textarea id="content" name="content" class="form-control" rows="5" required th:text="*{content}"></textarea>
-        </div>
-        <input type="hidden" name="createdBy.id" th:value="${createdById}">
-        <button type="submit" class="btn btn-primary">수정 완료</button>
-        <a href="/complaints" class="btn btn-secondary">취소</a>
-    </form>
-</div>
-</body>
-</html>

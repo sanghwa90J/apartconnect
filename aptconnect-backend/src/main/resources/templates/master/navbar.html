@@ -9,17 +9,22 @@
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentPage == 'dashboard' ? 'active' : ''}" href="/master/dashboard">대시보드</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:classappend="${currentPage == 'apartments' ? 'active' : ''}" href="/master/apartments">아파트 관리</a>
+                <!-- 기준정보 관리 -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="baseInfoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">기준정보 관리</a>
+                    <ul class="dropdown-menu"  aria-labelledby="baseInfoDropdown">
+                        <li><a class="dropdown-item" th:classappend="${currentPage == 'apartments' ? 'active' : ''}" href="/master/apartments">아파트 관리</a></li>
+                        <li><a class="dropdown-item" th:classappend="${currentPage == 'users' ? 'active' : ''}" href="/master/users">회원 관리</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:classappend="${currentPage == 'users' ? 'active' : ''}" href="/master/users">회원 관리</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:classappend="${currentPage == 'logs' ? 'active' : ''}" href="/master/logs">로그 관리</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:classappend="${currentPage == 'user-Activity' ? 'active' : ''}" href="/master/user-activity">사용자 활동 관리</a>
+
+                <!-- 추적 관리 -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="trackingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">추적 관리</a>
+                    <ul class="dropdown-menu"  aria-labelledby="trackingDropdown">
+                        <li><a class="dropdown-item" th:classappend="${currentPage == 'logs' ? 'active' : ''}" href="/master/logs">로그 관리</a></li>
+                        <li><a class="dropdown-item" th:classappend="${currentPage == 'user-Activity' ? 'active' : ''}" href="/master/user-activity">사용자 활동 관리</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentPage == 'announcements' ? 'active' : ''}" href="/announcements">공지사항 관리</a>
@@ -27,28 +32,22 @@
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${currentPage == 'complaints' ? 'active' : ''}" href="/complaints">민원 관리</a>
                 </li>
-                <li><a class="nav-link" th:classappend="${currentPage == 'votes' ? 'active' : ''}" href="/votes">투표 관리</a></li>
-                <li><a class="nav-link" th:classappend="${currentPage == 'my-votes' ? 'active' : ''}" href="/votes/my-votes">참여한 투표</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${currentPage == 'votes' ? 'active' : ''}" href="/votes">투표 관리</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${currentPage == 'my-votes' ? 'active' : ''}" href="/votes/my-votes">참여한 투표</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${currentPage == 'community' ? 'active' : ''}" href="/community">커뮤니티</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${currentPage == 'reports' ? 'active' : ''}" href="/reports">신고 관리</a></li>
             </ul>
             <span class="navbar-text me-3" th:if="${currentUser != null and currentUser.role.toString() == 'MASTER'}">MASTER</span>
             <a class="btn btn-danger" href="/logout">로그아웃</a>
         </div>
     </div>
 </nav>
+
+<!-- 커스텀 스크립트 -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let dropdowns = document.querySelectorAll(".navbar .dropdown");
-
-        dropdowns.forEach(function (dropdown) {
-            dropdown.addEventListener("mouseenter", function () {
-                let menu = this.querySelector(".dropdown-menu");
-                menu.classList.add("show");
-            });
-
-            dropdown.addEventListener("mouseleave", function () {
-                let menu = this.querySelector(".dropdown-menu");
-                menu.classList.remove("show");
-            });
+    document.querySelectorAll('.dropdown-toggle').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            e.preventDefault();
         });
     });
 </script>

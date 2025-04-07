@@ -1,9 +1,9 @@
 package com.aptconnect.config;
 
 import com.aptconnect.component.CustomAuthenticationSuccessHandler;
-import com.aptconnect.entity.User;
-import com.aptconnect.repository.UserRepository;
-import com.aptconnect.service.CustomUserDetailsService;
+import com.aptconnect.menu.auth.entity.User;
+import com.aptconnect.menu.auth.repository.UserRepository;
+import com.aptconnect.menu.auth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

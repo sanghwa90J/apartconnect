@@ -1,9 +1,9 @@
 package com.aptconnect.component;
 
-import com.aptconnect.entity.User;
-import com.aptconnect.entity.UserActivity;
-import com.aptconnect.repository.UserActivityRepository;
-import com.aptconnect.repository.UserRepository;
+import com.aptconnect.menu.auth.entity.User;
+import com.aptconnect.menu.master.userActivity.entity.UserActivity;
+import com.aptconnect.menu.master.userActivity.repository.UserActivityRepository;
+import com.aptconnect.menu.auth.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

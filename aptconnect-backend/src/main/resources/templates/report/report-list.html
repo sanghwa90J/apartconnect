@@ -1,0 +1,65 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title layout:fragment="title">신고 내역 관리</title>
+
+
+<!-- 🔹 네비게이션 영역 (role별 navbar 삽입) -->
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+</div>
+
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <table class="table table-bordered text-center">
+        <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>타입</th>
+            <th>대상 ID</th>
+            <th>신고자</th>
+            <th>사유</th>
+            <th>신고일</th>
+            <th>상태</th>
+            <th th:if="${currentRole == 'ROLE_MASTER'}">조치</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="report : ${reports}">
+            <td>
+                <a th:href="@{/reports/{id}(id=${report.id})}" th:text="${report.id}"></a>
+            </td>
+            <td th:text="${report.type}"></td>
+            <td>
+                <a th:href="@{${report.targetLink}}" th:text="${report.targetId}" target="_blank"></a>
+            </td>
+            <td th:text="${report.reporter.username}"></td>
+            <td th:text="${report.reason}"></td>
+            <td th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${report.status}"
+                th:classappend="${report.status?.name() == 'PENDING'} ? 'text-warning' :
+                                (${report.status?.name() == 'RESOLVED'} ? 'text-success' :
+                                (${report.status?.name() == 'REJECTED'} ? 'text-danger' : 'text-muted'))">
+            </td>
+            <td th:if="${currentRole == 'ROLE_MASTER'}">
+                <form th:action="@{/reports/{id}/status(id=${report.id})}" method="post">
+                    <input type="hidden" name="_method" value="patch" />
+                    <select name="status" class="form-select form-select-sm d-inline w-auto">
+                        <option value="PENDING" th:selected="${report.status.name() == 'PENDING'}">대기</option>
+                        <option value="RESOLVED" th:selected="${report.status.name() == 'RESOLVED'}">처리 완료</option>
+                        <option value="REJECTED" th:selected="${report.status.name() == 'REJECTED'}">기각</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">변경</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,42 @@
+<div th:fragment="editor(contentValue, fieldName)">
+    <div id="editor"></div>
+
+    <!-- ✅ 초기값 안전하게 hidden 처리 -->
+    <textarea id="initialContent" style="display: none;" th:text="${contentValue ?: ''}"></textarea>
+
+    <!-- ✅ fieldName이 주어지면 그걸 name으로, 아니면 'content'로 -->
+    <textarea id="editorHiddenField"
+              th:name="${fieldName != null} ? ${fieldName} : 'content'"
+              style="display:none;"></textarea>
+
+    <script>
+        const initialContent = document.getElementById("initialContent").value;
+
+        const editor = new toastui.Editor({
+            el: document.querySelector('#editor'),
+            height: '500px',
+            initialEditType: 'wysiwyg',
+            previewStyle: 'vertical',
+            initialValue: initialContent,
+            hooks: {
+                addImageBlobHook: async (blob, callback) => {
+                    const formData = new FormData();
+                    formData.append('image', blob);
+
+                    const response = await fetch('/api/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    callback(result.url, '업로드 이미지');
+                }
+            }
+        });
+
+        // ✅ 폼 제출 시 에디터 HTML 값을 textarea에 복사
+        document.getElementById('writeForm').addEventListener('submit', () => {
+            document.getElementById('editorHiddenField').value = editor.getHTML();
+        });
+    </script>
+</div>

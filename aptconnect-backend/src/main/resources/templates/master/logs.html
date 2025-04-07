@@ -1,134 +1,160 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>로그 관리</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
 
-<div th:replace="~{master/navbar :: navbar}"></div>
+<title>로그 관리</title>
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <span class="fw-bold">로그 수: </span>
-            <span th:text="${#lists.size(errorLogs)}"></span>
-        </div>
-
-        <form action="/master/logs" method="get" class="d-flex">
-            <input type="text" name="search" placeholder="IP 또는 Level 검색" class="form-control me-2" th:value="${searchKeyword}" style="height: 38px; min-width: 200px;">
-            <button type="submit" class="btn btn-secondary" style="height: 38px; min-width: 90px;">검색</button>
-            <a href="/master/logs" class="btn btn-light ms-2" style="height: 38px; min-width: 90px;">초기화</a>
-        </form>
-    </div>
-
-    <!-- 테스트용 에러 발생 버튼 -->
-    <div class="d-flex justify-content-between">
-        <button class="btn btn-danger mb-3" id="triggerError">테스트 에러 발생</button>
-    </div>
-
-    <div th:if="${#lists.size(errorLogs) == 0}" class="alert alert-warning text-center" role="alert">
-        검색된 로그가 없습니다.
-    </div>
-
-    <table class="table table-striped text-center" th:if="${#lists.size(errorLogs) > 0}">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>시간</th>
-            <th>레벨</th>
-            <th>메시지</th>
-            <th>경로</th>
-            <th>IP</th>
-            <th >삭제</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="log : ${errorLogs}" class="align-middle">
-            <td th:text="${log.id}"></td>
-            <td th:text="${log.timestamp}"></td>
-            <td th:text="${log.level}"></td>
-            <td>
-                <span th:text="${#strings.length(log.message) > 50 ? #strings.substring(log.message, 0, 50) + '...' : log.message}"th:title="${log.message}"></span>
-            </td>
-            <td th:text="${log.path}"></td>
-            <td th:text="${log.ipAddress}"></td>
-            <td>
-                <form th:action="@{/master/logs/delete}" method="post">
-                    <input type="hidden" name="logId" th:value="${log.id}">
-                    <button type="submit" class="btn btn-danger btn-sm">삭제</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <!-- ✅ 페이징 네비게이션 추가 -->
-    <nav aria-label="Page navigation" th:if="${logPage != null and logPage.totalPages > 1}">
-        <ul class="pagination justify-content-center">
-            <li class="page-item" th:classappend="${logPage.first} ? 'disabled'">
-                <a class="page-link" th:href="@{/master/logs(page=0, search=${searchKeyword}, logFilter=${logFilter})}">처음</a>
-            </li>
-            <li class="page-item" th:classappend="${logPage.first} ? 'disabled'">
-                <a class="page-link" th:href="@{/master/logs(page=${logPage.number - 1}, search=${searchKeyword}, logFilter=${logFilter})}">이전</a>
-            </li>
-
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, logPage.totalPages - 1)}"
-                th:classappend="${logPage.number == i} ? 'active'">
-                <a class="page-link" th:href="@{/master/logs(page=${i}, search=${searchKeyword}, logFilter=${logFilter})}" th:text="${i + 1}"></a>
-            </li>
-
-            <li class="page-item" th:classappend="${logPage.last} ? 'disabled'">
-                <a class="page-link" th:href="@{/master/logs(page=${logPage.number + 1}, search=${searchKeyword}, logFilter=${logFilter})}">다음</a>
-            </li>
-            <li class="page-item" th:classappend="${logPage.last} ? 'disabled'">
-                <a class="page-link" th:href="@{/master/logs(page=${logPage.totalPages - 1}, search=${searchKeyword}, logFilter=${logFilter})}">끝</a>
-            </li>
-        </ul>
-    </nav>
+<div layout:fragment="navbar">
+    <div th:replace="~{/master/navbar :: navbar}"></div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const getCellValue = (row, index) => row.children[index].innerText || row.children[index].textContent;
-        const comparer = (idx, asc) => (a, b) =>
-            ((v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2))
-            (getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="fw-bold">로그 수: </span>
+                <span th:text="${#lists.size(errorLogs)}"></span>
+            </div>
 
-        document.querySelectorAll("th").forEach(th => {
-            th.addEventListener("click", function() {
-                const table = th.closest("table");
-                const tbody = table.querySelector("tbody");
-                const asc = th.dataset.asc === "true";
-                th.dataset.asc = (!asc).toString();
+            <form action="/master/logs" method="get" class="d-flex">
+                <input type="text" name="search" placeholder="IP 또는 Level 검색" class="form-control me-2" th:value="${searchKeyword}" style="height: 38px; min-width: 200px;">
+                <button type="submit" class="btn btn-secondary" style="height: 38px; min-width: 90px;">검색</button>
+                <a href="/master/logs" class="btn btn-light ms-2" style="height: 38px; min-width: 90px;">초기화</a>
+            </form>
+        </div>
 
-                Array.from(tbody.querySelectorAll("tr"))
-                    .sort(comparer(Array.from(th.parentNode.children).indexOf(th), !asc))
-                    .forEach(tr => tbody.appendChild(tr));
+        <div th:if="${#lists.size(errorLogs) == 0}" class="alert alert-warning text-center" role="alert">
+            검색된 로그가 없습니다.
+        </div>
+
+        <table class="table table-striped text-center" th:if="${#lists.size(errorLogs) > 0}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>시간</th>
+                <th>레벨</th>
+                <th>메시지</th>
+                <th>경로</th>
+                <th>IP</th>
+                <th >삭제</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${errorLogs}" class="align-middle log-row"
+                th:data-id="${log.id}"
+                th:data-timestamp="${log.timestamp}"
+                th:data-level="${log.level}"
+                th:data-message="${log.message}"
+                th:data-path="${log.path}"
+                th:data-ip="${log.ipAddress}"
+                th:data-user-agent="${log.userAgent}"
+                th:data-stack-trace="${log.stackTrace}">
+
+                <td th:text="${log.id}"></td>
+                <td th:text="${log.timestamp}"></td>
+                <td th:text="${log.level}"></td>
+                <td>
+                    <span th:text="${#strings.length(log.message) > 50 ? #strings.substring(log.message, 0, 50) + '...' : log.message}"th:title="${log.message}"></span>
+                </td>
+                <td th:text="${log.path}"></td>
+                <td th:text="${log.ipAddress}"></td>
+                <td>
+                    <form th:action="@{/master/logs/delete}" method="post">
+                        <input type="hidden" name="logId" th:value="${log.id}">
+                        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- ✅ 페이징 네비게이션 추가 -->
+        <nav aria-label="Page navigation" th:if="${logPage != null and logPage.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${logPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/master/logs(page=0, search=${searchKeyword}, logFilter=${logFilter})}">처음</a>
+                </li>
+                <li class="page-item" th:classappend="${logPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/master/logs(page=${logPage.number - 1}, search=${searchKeyword}, logFilter=${logFilter})}">이전</a>
+                </li>
+
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, logPage.totalPages - 1)}"
+                    th:classappend="${logPage.number == i} ? 'active'">
+                    <a class="page-link" th:href="@{/master/logs(page=${i}, search=${searchKeyword}, logFilter=${logFilter})}" th:text="${i + 1}"></a>
+                </li>
+
+                <li class="page-item" th:classappend="${logPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/master/logs(page=${logPage.number + 1}, search=${searchKeyword}, logFilter=${logFilter})}">다음</a>
+                </li>
+                <li class="page-item" th:classappend="${logPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/master/logs(page=${logPage.totalPages - 1}, search=${searchKeyword}, logFilter=${logFilter})}">끝</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- ✅ 로그 상세 보기 모달 -->
+    <div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logDetailModalLabel">로그 상세 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>시간:</strong> <span id="logTimestamp"></span></p>
+                    <p><strong>레벨:</strong> <span id="logLevel"></span></p>
+                    <p><strong>메시지:</strong> <span id="logMessage"></span></p>
+                    <p><strong>경로:</strong> <span id="logPath"></span></p>
+                    <p><strong>IP:</strong> <span id="logIp"></span></p>
+                    <p><strong>User-Agent:</strong> <span id="logUserAgent"></span></p>
+                    <p><strong>Stack Trace:</strong></p>
+                    <pre id="logStackTrace" class="bg-light p-2 border" style="white-space: pre-wrap; word-wrap: break-word;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        $(document).ready(function () {
+            $(".log-row").click(function () {
+                let logData = $(this).data(); // 데이터 속성 가져오기
+
+                $("#logTimestamp").text(logData.timestamp);
+                $("#logLevel").text(logData.level);
+                $("#logMessage").text(logData.message);
+                $("#logPath").text(logData.path);
+                $("#logIp").text(logData.ip);
+                $("#logUserAgent").text(logData.userAgent);
+                $("#logStackTrace").text(logData.stackTrace);
+
+                let logModal = new bootstrap.Modal(document.getElementById("logDetailModal")); // ✅ Bootstrap 5 방식
+                logModal.show();
             });
         });
-    });
-</script>
+    </script>
 
-<script>
-    $(document).ready(function() {
-        $("#triggerError").click(function() {
-            $.ajax({
-                url: "/master/test-error",
-                type: "GET",
-                success: function() {
-                    alert("테스트 에러가 발생했습니다. 로그를 확인하세요.");
-                    location.reload();
-                },
-                error: function() {
-                    alert("테스트 에러 발생 요청이 완료되었습니다.");
-                    location.reload();
-                }
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const getCellValue = (row, index) => row.children[index].innerText || row.children[index].textContent;
+            const comparer = (idx, asc) => (a, b) =>
+                ((v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2))
+                (getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+            document.querySelectorAll("th").forEach(th => {
+                th.addEventListener("click", function() {
+                    const table = th.closest("table");
+                    const tbody = table.querySelector("tbody");
+                    const asc = th.dataset.asc === "true";
+                    th.dataset.asc = (!asc).toString();
+
+                    Array.from(tbody.querySelectorAll("tr"))
+                        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), !asc))
+                        .forEach(tr => tbody.appendChild(tr));
+                });
             });
         });
-    });
-</script>
-
-</body>
-</html>
+    </script>
+</th:block>

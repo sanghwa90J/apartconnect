@@ -1,90 +1,93 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>투표 생성</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-<!-- ✅ 역할별 네비게이션 바 -->
-<div th:if="${currentRole == 'ROLE_MASTER'}">
-    <div th:replace="~{master/navbar :: navbar}"></div>
-</div>
-<div th:if="${currentRole == 'ROLE_ADMIN'}">
-    <div th:replace="~{admin/navbar :: navbar}"></div>
-</div>
-<div th:if="${currentRole == 'ROLE_USER'}">
-    <div th:replace="~{register/navbar :: navbar}"></div>
-</div>
-<div class="container mt-4">
-    <!-- ✅ 에러 메시지가 있을 경우 경고창 표시 -->
-    <div th:if="${errorMessage}" class="alert alert-danger">
-        <span th:text="${errorMessage}"></span>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title>투표 생성</title>
+
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
     </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_USER'}">
+        <div th:replace="~{/register/navbar :: navbar}"></div>
+    </div>
+</div>
 
-    <form th:action="@{/votes/create}" method="post" th:object="${votePollRequest}">
-        <div class="mb-3">
-            <label for="title" class="form-label">투표 제목</label>
-            <input type="text" id="title" name="title" class="form-control"
-                   th:value="${savedVotePollRequest?.title}" required>
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <!-- ✅ 에러 메시지가 있을 경우 경고창 표시 -->
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}"></span>
         </div>
 
-        <div class="mb-3">
-            <label for="description" class="form-label">설명</label>
-            <textarea id="description" name="description" class="form-control" rows="3" required
-                      th:text="${savedVotePollRequest?.description}"></textarea>
-        </div>
+        <form id="writeForm" th:action="@{/votes/create}" method="post" th:object="${votePollRequest}">
+            <div class="mb-3">
+                <label for="title" class="form-label">투표 제목</label>
+                <input type="text" id="title" name="title" class="form-control"
+                       th:value="${savedVotePollRequest?.title}" required>
+            </div>
 
-        <div class="mb-3">
-            <label for="startDate" class="form-label">시작 날짜</label>
-            <input type="datetime-local" id="startDate" name="startDate" class="form-control"
-                   th:value="${savedVotePollRequest?.startDate}" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">설명</label>
+                <div th:replace="fragments/editor :: editor(${savedVotePollRequest?.description ?: ''}, 'description')"></div>
 
-        <div class="mb-3">
-            <label for="endDate" class="form-label">마감 날짜</label>
-            <input type="datetime-local" id="endDate" name="endDate" class="form-control"
-                   th:value="${savedVotePollRequest?.endDate}" required>
-        </div>
+<!--                            <textarea id="description" name="description" class="form-control" rows="3" required-->
+<!--                          th:text="${savedVotePollRequest?.description}"></textarea>-->
+            </div>
 
-        <!-- ✅ 선택지 추가 -->
-        <div class="mb-3">
-            <label class="form-label">투표 선택지</label>
-            <div id="options-container">
-                <div th:each="option, iterStat : ${savedVotePollRequest?.options}">
-                    <div class="input-group mb-2">
-                        <input type="text" name="options" class="form-control option-input"
-                               th:value="${option}" required>
-                        <button type="button" class="btn btn-danger remove-option">삭제</button>
+            <div class="mb-3">
+                <label for="startDate" class="form-label">시작 날짜</label>
+                <input type="datetime-local" id="startDate" name="startDate" class="form-control"
+                       th:value="${savedVotePollRequest?.startDate}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="endDate" class="form-label">마감 날짜</label>
+                <input type="datetime-local" id="endDate" name="endDate" class="form-control"
+                       th:value="${savedVotePollRequest?.endDate}" required>
+            </div>
+
+            <!-- ✅ 선택지 추가 -->
+            <div class="mb-3">
+                <label class="form-label">투표 선택지</label>
+                <div id="options-container">
+                    <div th:each="option, iterStat : ${savedVotePollRequest?.options}">
+                        <div class="input-group mb-2">
+                            <input type="text" name="options" class="form-control option-input"
+                                   th:value="${option}" required>
+                            <button type="button" class="btn btn-danger remove-option">삭제</button>
+                        </div>
                     </div>
                 </div>
+                <button type="button" id="add-option" class="btn btn-secondary">+ 선택지 추가</button>
             </div>
-            <button type="button" id="add-option" class="btn btn-secondary">+ 선택지 추가</button>
-        </div>
 
-        <button type="submit" class="btn btn-primary">투표 생성</button>
-        <a href="/votes" class="btn btn-secondary">취소</a>
-    </form>
+            <button type="submit" class="btn btn-primary">투표 생성</button>
+            <a href="/votes" class="btn btn-secondary">취소</a>
+        </form>
+    </div>
 </div>
+<th:block layout:fragment="scripts">
+    <script>
+        $(document).ready(function () {
+            // ✅ 선택지 추가 기능 유지
+            $("#add-option").click(function () {
+                $("#options-container").append(
+                    '<div class="input-group mb-2">' +
+                    '<input type="text" name="options" class="form-control option-input" placeholder="선택지 입력" required>' +
+                    '<button type="button" class="btn btn-danger remove-option">삭제</button>' +
+                    '</div>'
+                );
+            });
 
-<script>
-    $(document).ready(function () {
-        // ✅ 선택지 추가 기능 유지
-        $("#add-option").click(function () {
-            $("#options-container").append(
-                '<div class="input-group mb-2">' +
-                '<input type="text" name="options" class="form-control option-input" placeholder="선택지 입력" required>' +
-                '<button type="button" class="btn btn-danger remove-option">삭제</button>' +
-                '</div>'
-            );
+            // ✅ 선택지 삭제 기능 유지
+            $(document).on("click", ".remove-option", function () {
+                $(this).closest(".input-group").remove();
+            });
         });
-
-        // ✅ 선택지 삭제 기능 유지
-        $(document).on("click", ".remove-option", function () {
-            $(this).closest(".input-group").remove();
-        });
-    });
-</script>
-
-</body>
-</html>
+    </script>
+</th:block>

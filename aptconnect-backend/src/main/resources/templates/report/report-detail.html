@@ -1,0 +1,75 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title>신고 상세</title>
+
+<!-- 🔹 네비게이션 영역 (role별 navbar 삽입) -->
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+</div>
+
+
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th>
+            <td th:text="${report.id}"></td>
+        </tr>
+        <tr>
+            <th>타입</th>
+            <td th:text="${report.type}"></td>
+        </tr>
+        <tr>
+            <th>대상 ID</th>
+            <td>
+                <a th:href="@{${report.targetLink}}" th:text="${report.targetId}" target="_blank"></a>
+            </td>
+        </tr>
+        <tr>
+            <th>신고자</th>
+            <td th:text="${report.reporter.username}"></td>
+        </tr>
+        <tr>
+            <th>사유</th>
+            <td th:text="${report.reason}"></td>
+        </tr>
+        <tr>
+            <th>신고일</th>
+            <td th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+        </tr>
+        <tr>
+            <th>상태</th>
+            <td th:text="${report.status}"
+                th:classappend="${report.status?.name() == 'PENDING'} ? 'text-warning' :
+                    (${report.status?.name() == 'RESOLVED'} ? 'text-success' :
+                    (${report.status?.name() == 'REJECTED'} ? 'text-danger' : 'text-muted'))">
+            </td>
+        </tr>
+    </table>
+
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <form th:action="@{/reports/{id}/status(id=${report.id})}" method="post">
+            <input type="hidden" name="_method" value="patch" />
+            <div class="mb-3">
+                <label for="statusSelect" class="form-label">상태 변경</label>
+                <select name="status" id="statusSelect" class="form-select">
+                    <option value="PENDING" th:selected="${report.status.name() == 'PENDING'}">대기</option>
+                    <option value="RESOLVED" th:selected="${report.status.name() == 'RESOLVED'}">처리 완료</option>
+                    <option value="REJECTED" th:selected="${report.status.name() == 'REJECTED'}">기각</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">상태 변경</button>
+        </form>
+    </div>
+
+    <div class="mt-3">
+        <a href="/reports" class="btn btn-secondary">← 신고 목록으로</a>
+    </div>
+</div>

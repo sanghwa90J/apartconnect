@@ -1,74 +1,74 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>사용자 관리</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body>
-<div th:replace="~{master/navbar :: navbar}" ></div>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <span class="fw-bold">총 사용자 수: </span>
-            <span th:text="${users.size()}"></span>
-        </div>
-        <form action="/master/users" method="get" class="d-flex">
-            <input type="text" name="search" placeholder="이름 또는 이메일 검색" class="form-control me-2" th:value="${searchKeyword}" style="height: 38px;">
-            <select name="roleFilter" class="form-select me-2" style="height: 38px;">
-                <option value="" th:selected="${roleFilter == null or roleFilter == ''}">모든 권한</option>
-                <option value="USER" th:selected="${roleFilter == 'USER'}">USER</option>
-                <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">ADMIN</option>
-            </select>
-            <button type="submit" class="btn btn-secondary" style="height: 38px; min-width: 90px;">검색</button>
-            <a href="/master/users" class="btn btn-light ms-2" style="height: 38px; min-width: 90px;">초기화</a>
-        </form>
-    </div>
+<title>사용자 관리</title>
 
-    <div th:if="${users.size() == 0}" class="alert alert-warning text-center" role="alert">
-        검색된 사용자가 없습니다.
-    </div>
-
-    <table class="table table-striped text-center" th:if="${users.size() > 0}">
-        <thead>
-        <tr>
-            <th style="width: 20%">이메일</th>
-            <th style="width: 20%">이름</th>
-            <th style="width: 15%">권한</th>
-            <th style="width: 25%">소속 아파트</th>
-            <th style="width: 15%">아파트 접근 권한</th>
-            <th style="width: 15%">권한 변경</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="user : ${users}" class="align-middle">
-            <td th:text="${user.email}"></td>
-            <td th:text="${user.name}"></td>
-            <td th:text="${user.role}"></td>
-            <td th:text="${user.apartmentName}"></td>
-            <td>
-                <form th:action="@{/master/users/update-access}" method="post">
-                    <input type="hidden" name="userId" th:value="${user.id}">
-                    <select name="newAccess" class="form-select" onchange="this.form.submit()" style="height: 32px; min-width: 120px;">
-                        <option value="PENDING" th:selected="${user.apartmentAccess == 'PENDING'}">PENDING</option>
-                        <option value="APPROVED" th:selected="${user.apartmentAccess == 'APPROVED'}">APPROVED</option>
-                    </select>
-                </form>
-            </td>
-            <td>
-                <form th:action="@{/master/update-role/{userId}(userId=${user.id})}" method="post" class="d-flex align-items-center">
-                    <select name="newRole" class="form-select me-2" style="height: 32px; min-width: 120px;">
-                        <option value="USER">USER</option>
-                        <option value="ADMIN">ADMIN</option>
-                    </select>
-                    <button type="submit" class="btn btn-warning btn-sm" style="min-width: 90px;">변경</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<div layout:fragment="navbar">
+    <div th:replace="~{/master/navbar :: navbar}"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="fw-bold">총 사용자 수: </span>
+                <span th:text="${users.size()}"></span>
+            </div>
+            <form action="/master/users" method="get" class="d-flex">
+                <input type="text" name="search" placeholder="이름 또는 이메일 검색" class="form-control me-2" th:value="${searchKeyword}" style="height: 38px;">
+                <select name="roleFilter" class="form-select me-2" style="height: 38px;">
+                    <option value="" th:selected="${roleFilter == null or roleFilter == ''}">모든 권한</option>
+                    <option value="USER" th:selected="${roleFilter == 'USER'}">USER</option>
+                    <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">ADMIN</option>
+                </select>
+                <button type="submit" class="btn btn-secondary" style="height: 38px; min-width: 90px;">검색</button>
+                <a href="/master/users" class="btn btn-light ms-2" style="height: 38px; min-width: 90px;">초기화</a>
+            </form>
+        </div>
+
+        <div th:if="${users.size() == 0}" class="alert alert-warning text-center" role="alert">
+            검색된 사용자가 없습니다.
+        </div>
+
+        <table class="table table-striped text-center" th:if="${users.size() > 0}">
+            <thead>
+            <tr>
+                <th style="width: 20%">이메일</th>
+                <th style="width: 20%">이름</th>
+                <th style="width: 15%">권한</th>
+                <th style="width: 25%">소속 아파트</th>
+                <th style="width: 15%">아파트 접근 권한</th>
+                <th style="width: 15%">권한 변경</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}" class="align-middle">
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.name}"></td>
+                <td th:text="${user.role}"></td>
+                <td th:text="${user.apartmentName}"></td>
+                <td>
+                    <form th:action="@{/master/users/update-access}" method="post">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <select name="newAccess" class="form-select" onchange="this.form.submit()" style="height: 32px; min-width: 120px;">
+                            <option value="PENDING" th:selected="${user.apartmentAccess == 'PENDING'}">PENDING</option>
+                            <option value="APPROVED" th:selected="${user.apartmentAccess == 'APPROVED'}">APPROVED</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <form th:action="@{/master/update-role/{userId}(userId=${user.id})}" method="post" class="d-flex align-items-center">
+                        <select name="newRole" class="form-select me-2" style="height: 32px; min-width: 120px;">
+                            <option value="USER">USER</option>
+                            <option value="ADMIN">ADMIN</option>
+                        </select>
+                        <button type="submit" class="btn btn-warning btn-sm" style="min-width: 90px;">변경</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

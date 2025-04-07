@@ -1,7 +1,7 @@
 package com.aptconnect.config;
 
-import com.aptconnect.entity.User;
-import com.aptconnect.repository.UserRepository;
+import com.aptconnect.menu.auth.entity.User;
+import com.aptconnect.menu.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;

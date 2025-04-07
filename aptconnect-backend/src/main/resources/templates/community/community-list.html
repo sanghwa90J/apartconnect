@@ -1,0 +1,55 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title>커뮤니티 게시판</title>
+
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_USER'}">
+        <div th:replace="~{/register/navbar :: navbar}"></div>
+    </div>
+</div>
+
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <a href="/community/create" class="btn btn-primary mb-3">새 글 작성</a>
+            </div>
+
+            <form method="get" action="/community/search" class="d-flex mb-3">
+                <input type="text" name="q" class="form-control me-2" placeholder="검색어 입력">
+                <button type="submit" class="btn btn-primary" style="height: 38px; min-width: 90px;">검색</button>
+                <a href="/community" class="btn btn-light ms-2" style="height: 38px; min-width: 90px;">초기화</a>
+            </form>
+        </div>
+
+        <table class="table table-hover text-center">
+            <thead class="table-dark">
+            <tr>
+                <th style="width: 40%">제목</th>
+                <th style="width: 20%">카테고리</th>
+                <th style="width: 20%">작성자</th>
+                <th style="width: 20%">작성일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="post : ${posts}" class="align-middle">
+                <td>
+                    <a th:href="@{/community/{id}(id=${post.id})}" th:text="${post.title}"></a>
+                </td>
+                <td th:text="${post.category}"></td>
+                <td th:text="${post.user.username}"></td>
+                <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

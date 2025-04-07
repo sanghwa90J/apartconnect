@@ -1,0 +1,41 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" lang="KO">
+
+<title>게시글 수정</title>
+
+<div layout:fragment="navbar">
+    <div th:if="${currentRole == 'ROLE_MASTER'}">
+        <div th:replace="~{/master/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_ADMIN'}">
+        <div th:replace="~{/admin/navbar :: navbar}"></div>
+    </div>
+    <div th:if="${currentRole == 'ROLE_USER'}">
+        <div th:replace="~{/register/navbar :: navbar}"></div>
+    </div>
+</div>
+
+<!-- 🔹 본문 영역 -->
+<div layout:fragment="main-content">
+    <div class="container mt-4">
+        <h2>게시글 수정</h2>
+        <form id="writeForm" th:action="@{/community/update/{id}(id=${post.id})}" method="post">
+            <label>제목</label>
+            <input type="text" name="title" class="form-control" th:value="${post.title}" required>
+
+            <label>카테고리</label>
+            <select name="category" class="form-control">
+                <option value="자유게시판" th:selected="${post.category == '자유게시판'}">자유게시판</option>
+                <option value="정보공유" th:selected="${post.category == '정보공유'}">정보공유</option>
+                <option value="Q&A" th:selected="${post.category == 'Q&A'}">Q&A</option>
+            </select>
+
+            <label>내용</label>
+            <div th:replace="fragments/editor :: editor(${post.content})"></div>
+
+            <button type="submit" class="btn btn-warning mt-2">수정</button>
+            <a href="/community" class="btn btn-secondary">취소</a>
+        </form>
+    </div>
+</div>
